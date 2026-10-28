@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Maps Demo API Key Test | Smart Crash & Traffic System</title>
+  <style>
+    :root {
+      --bg-dark: #0a0f1d;
+      --card-bg: #111a2e;
+      --card-border: rgba(255, 255, 255, 0.1);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #3b82f6;
+      --accent-green: #10b981;
+      --accent-yellow: #f59e0b;
+      --accent-red: #ef4444;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      padding: 24px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .header-title h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-title p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .badge-isolated {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+    }
+
+    @media (max-width: 960px) {
+      .grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Map Box */
+    #testMapCanvas {
+      width: 100%;
+      height: 520px;
+      border-radius: 10px;
+      background: #060b14;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+    }
+
+    .map-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 24px;
+    }
+
+    .map-placeholder .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--accent-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 14px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Status & Controls */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .status-pill.pending {
+      background: rgba(148, 163, 184, 0.15);
+      color: #94a3b8;
+    }
+
+    .status-pill.success {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .status-pill.warning {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .status-pill.danger {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .diagnostics-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .diag-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .diag-label {
+      color: var(--text-muted);
+    }
+
+    /* Key Configuration Box */
+    .key-input-group {
+      margin-top: 14px;
+      margin-bottom: 14px;
+    }
+
+    .key-input-group label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .key-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .key-input-row input {
+      flex: 1;
+      background: #090f1e;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      font-family: monospace;
+      outline: none;
+    }
+
+    .key-input-row input:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .btn {
+      background: var(--accent-blue);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: #2563eb;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Console Log Box */
+    .console-box {
+      margin-top: 18px;
+    }
+
+    .console-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .console-header span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    #consoleLogView {
+      background: #050811;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 10px 12px;
+      height: 160px;
+      overflow-y: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.76rem;
+      color: #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .log-line {
+      display: flex;
+      gap: 6px;
+      word-break: break-all;
+    }
+
+    .log-line.info { color: #93c5fd; }
+    .log-line.warn { color: #fde047; }
+    .log-line.error { color: #fca5a5; font-weight: 600; }
+    .log-line.success { color: #86efac; }
+
+    /* Alert Banners */
+    .alert-banner {
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.4;
+    }
+
+    .alert-banner.info {
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #bfdbfe;
+    }
+
+    .alert-banner.warning {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fde68a;
+    }
+
+    .alert-banner.danger {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fecaca;
+    }
+
+    .alert-banner.success {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #a7f3d0;
+    }
+
+    .code-tag {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
+
+    .action-links {
+      margin-top: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .action-links a {
+      color: var(--accent-blue);
+      text-decoration: none;
+    }
+
+    .action-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-title">
+        <h1>
+          <span>🗺️ Google Maps Demo Key Integration Test</span>
+          <span class="badge-isolated">Isolated Test Component</span>
+        </h1>
+        <p>Verifies Google Maps JavaScript API, Bengaluru map rendering, marker creation, and key capabilities without altering the main Leaflet map.</p>
+      </div>
+      <div>
+        <a href="index.html" class="btn btn-secondary">← Back to Main Application</a>
+      </div>
+    </header>
+
+    <!-- Top Alert Banner -->
+    <div id="mainAlertBanner" class="alert-banner info">
+      <span>ℹ️</span>
+      <div id="mainAlertText">
+        Detecting configuration from <span class="code-tag">backend/.env</span> via <span class="code-tag">/api/config/maps</span>...
+      </div>
+    </div>
+
+    <div class="grid-layout">
+      <!-- Left: Interactive Map Container -->
+      <div class="card">
+        <div class="card-title">
+          <span>📍 Map Display (Bengaluru Center: 12.9716° N, 77.5946° E)</span>
+        </div>
+        
+        <div id="testMapCanvas">
+          <div class="map-placeholder" id="mapPlaceholder">
+            <div class="spinner"></div>
+            <p><strong>Initializing Google Maps...</strong></p>
+            <p style="font-size: 0.82rem; margin-top: 6px; max-width: 360px;">
+              Waiting for API key confirmation and Google Maps JavaScript API script load.
+            </p>
+          </div>
+        </div>
+
+        <div class="action-links">
+          <span>Target Center: <strong>Vidhana Soudha / Bengaluru City Center</strong></span>
+          <button type="button" class="btn btn-secondary" id="btnRecenter" style="padding: 4px 10px; font-size: 0.8rem;">
+            ⌖ Recenter Map
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Diagnostics & Key Controls -->
+      <div class="card">
+        <div class="card-title">
+          <span>🔍 Diagnostic Checklist</span>
+        </div>
+
+        <ul class="diagnostics-list">
+          <li class="diag-item">
+            <span class="diag-label">API Key Configuration:</span>
+            <span class="status-pill pending" id="pillKeyConfig">Checking...</span>
+          </li>
+          <li class="diag-item">
+            <span class="diag-label">Script Network Load:</span>
+            <span class="status-pill pending" id="pillScriptLoad">Pending</span>
+          </li>
+          <li class="diag-item">
+            <span class="diag-label">Key Auth (gm_authFailure):</span>
+            <span class="status-pill pending" id="pillAuthStatus">Pending</span>
+          </li>
+          <li class="diag-item">
+            <span class="diag-label">Bengaluru Map Canvas:</span>
+            <span class="status-pill pending" id="pillMapRender">Pending</span>
+          </li>
+          <li class="diag-item">
+            <span class="diag-label">Bengaluru Marker:</span>
+            <span class="status-pill pending" id="pillMarker">Pending</span>
+          </li>
+          <li class="diag-item">
+            <span class="diag-label">Directions API Capability:</span>
+            <span class="status-pill pending" id="pillDirectionsApi">Pending</span>
+          </li>
+        </ul>
+
+        <!-- API Key Safe Configuration Box -->
+        <div class="key-input-group">
+          <label for="inputLocalKey">Test with API Key (Local session or from <span class="code-tag">backend/.env</span>):</label>
+          <div class="key-input-row">
+            <input type="password" id="inputLocalKey" placeholder="Paste AIzaSy... demo key here" autocomplete="off" spellcheck="false">
+            <button type="button" class="btn" id="btnApplyKey">Load Map</button>
+          </div>
+          <p style="font-size: 0.74rem; color: var(--text-muted); margin-top: 6px;">
+            🔒 Safe & Excluded: Key is read from local <span class="code-tag">backend/.env</span> (gitignored) or held in memory. Never logged or committed to GitHub.
+          </p>
+        </div>
+
+        <!-- Capability Explanation Box -->
+        <div id="capabilityNotice" style="font-size: 0.8rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px; margin-top: 10px;">
+          <strong style="color: #60a5fa; display: block; margin-bottom: 4px;">Demo Key Assessment:</strong>
+          <span id="capabilityAssessmentText">
+            Google Maps Demo / Developer keys require "Maps JavaScript API" enabled in Google Cloud Console. If the key has HTTP referrer restrictions or missing billing, Google triggers an authentication alert.
+          </span>
+        </div>
+
+        <!-- Real-time Console Log Capture -->
+        <div class="console-box">
+          <div class="console-header">
+            <span>Captured Console & Error Log</span>
+            <button type="button" id="btnClearLog" style="background:none; border:none; color:var(--text-muted); font-size:0.75rem; cursor:pointer;">Clear</button>
+          </div>
+          <div id="consoleLogView"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // STATE & CONFIGURATION
+    // =========================================================================
+    var BENGALURU_COORDS = { lat: 12.9716, lng: 77.5946 };
+    var activeGoogleMap = null;
+    var activeMarker = null;
+    var activeInfoWindow = null;
+    var currentLoadedKey = null;
+    var authFailureTriggered = false;
+
+    // DOM Elements
+    var pillKeyConfig = document.getElementById("pillKeyConfig");
+    var pillScriptLoad = document.getElementById("pillScriptLoad");
+    var pillAuthStatus = document.getElementById("pillAuthStatus");
+    var pillMapRender = document.getElementById("pillMapRender");
+    var pillMarker = document.getElementById("pillMarker");
+    var pillDirectionsApi = document.getElementById("pillDirectionsApi");
+    var mainAlertBanner = document.getElementById("mainAlertBanner");
+    var mainAlertText = document.getElementById("mainAlertText");
+    var consoleLogView = document.getElementById("consoleLogView");
+    var inputLocalKey = document.getElementById("inputLocalKey");
+    var btnApplyKey = document.getElementById("btnApplyKey");
+    var btnRecenter = document.getElementById("btnRecenter");
+    var mapPlaceholder = document.getElementById("mapPlaceholder");
+    var capabilityAssessmentText = document.getElementById("capabilityAssessmentText");
+
+    // =========================================================================
+    // CONSOLE CAPTURE & LOGGER
+    // =========================================================================
+    function logToView(level, msg) {
+      if (!consoleLogView) return;
+      var line = document.createElement("div");
+      line.className = "log-line " + level;
+      var timestamp = new Date().toLocaleTimeString();
+      line.textContent = "[" + timestamp + "] " + msg;
+      consoleLogView.appendChild(line);
+      consoleLogView.scrollTop = consoleLogView.scrollHeight;
+    }
+
+    // Intercept console.warn and console.error
+    var origWarn = console.warn;
+    var origError = console.error;
+    console.warn = function() {
+      var args = Array.from(arguments).join(" ");
+      logToView("warn", "WARN: " + args);
+      origWarn.apply(console, arguments);
+    };
+    console.error = function() {
+      var args = Array.from(arguments).join(" ");
+      logToView("error", "ERROR: " + args);
+      origError.apply(console, arguments);
+      checkConsoleErrorMessage(args);
+    };
+
+    window.addEventListener("error", function(evt) {
+      if (evt && evt.message) {
+        logToView("error", "UNCAUGHT: " + evt.message);
+        checkConsoleErrorMessage(evt.message);
+      }
+    });
+
+    function setPill(el, status, text) {
+      if (!el) return;
+      el.className = "status-pill " + status;
+      el.textContent = text;
+    }
+
+    function setBanner(type, htmlContent) {
+      if (!mainAlertBanner || !mainAlertText) return;
+      mainAlertBanner.className = "alert-banner " + type;
+      mainAlertText.innerHTML = htmlContent;
+    }
+
+    // =========================================================================
+    // GOOGLE MAPS AUTHENTICATION ERROR BOUNDARY
+    // =========================================================================
+    // Google Maps API invokes window.gm_authFailure when an API key is rejected
+    window.gm_authFailure = function() {
+      authFailureTriggered = true;
+      setPill(pillAuthStatus, "danger", "AUTH FAILED");
+      setPill(pillMapRender, "danger", "BLOCKED");
+      logToView("error", "Google Maps Platform rejected the API Key (gm_authFailure).");
+
+      setBanner("danger", 
+        "<strong>❌ Google Maps Authentication Failed (gm_authFailure)</strong><br>" +
+        "The Demo Key was rejected by Google Maps Platform. Common reasons:<br>" +
+        "1. <strong>Maps JavaScript API is not enabled</strong> in Google Cloud Console.<br>" +
+        "2. <strong>Billing is disabled</strong> on the Google Cloud project.<br>" +
+        "3. <strong>HTTP Referrer restriction mismatch</strong> (allowed origins do not include <span class='code-tag'>http://localhost:*</span> or <span class='code-tag'>http://127.0.0.1:*</span>).<br>" +
+        "<em>The Smart Crash & Traffic Management System will continue running safely on the free Leaflet + OSRM engine.</em>"
+      );
+
+      capabilityAssessmentText.innerHTML = 
+        "<span style='color:#f87171;'>Demo Key Status: Authentication Rejected</span><br>" +
+        "The key cannot display Google Maps until 'Maps JavaScript API' is activated with valid billing and referrer settings in Google Cloud Console.";
+    };
+
+    function checkConsoleErrorMessage(msg) {
+      var lower = (msg || "").toLowerCase();
+      if (lower.includes("apinotactivatedmaperror")) {
+        setPill(pillAuthStatus, "danger", "API Not Activated");
+        setBanner("warning", "Google Maps error: <strong>ApiNotActivatedMapError</strong>. Please enable <em>Maps JavaScript API</em> in Google Cloud Console.");
+      } else if (lower.includes("referernotallowedmaperror")) {
+        setPill(pillAuthStatus, "danger", "Referrer Blocked");
+        setBanner("warning", "Google Maps error: <strong>RefererNotAllowedMapError</strong>. Please add <span class='code-tag'>http://localhost/*</span> to allowed HTTP referrers in Google Cloud Console.");
+      } else if (lower.includes("billingnotenabledmaperror")) {
+        setPill(pillAuthStatus, "danger", "Billing Disabled");
+        setBanner("warning", "Google Maps error: <strong>BillingNotEnabledMapError</strong>. Google Cloud requires an active billing profile even for demo usage.");
+      } else if (lower.includes("invalidkeymaperror")) {
+        setPill(pillAuthStatus, "danger", "Invalid Key");
+        setBanner("danger", "Google Maps error: <strong>InvalidKeyMapError</strong>. Please check that the API key was copied correctly.");
+      }
+    }
+
+    // =========================================================================
+    // LOAD GOOGLE MAPS API SCRIPT DYNAMICALLY
+    // =========================================================================
+    function loadGoogleMapsFromUrl(scriptUrl) {
+      setPill(pillKeyConfig, "success", "CONFIGURED IN .ENV");
+      setPill(pillScriptLoad, "pending", "Loading SDK...");
+      logToView("info", "Loading Google Maps via secure backend loader: " + scriptUrl);
+
+      var oldScript = document.getElementById("googleMapsTestScript");
+      if (oldScript) oldScript.remove();
+
+      window.onGoogleMapsTestLoaded = function() {
+        logToView("success", "Google Maps JavaScript API script loaded successfully.");
+        setPill(pillScriptLoad, "success", "LOADED (v" + (window.google && google.maps && google.maps.version ? google.maps.version : "latest") + ")");
+        setTimeout(function() {
+          if (!authFailureTriggered) {
+            setPill(pillAuthStatus, "success", "AUTHORIZED");
+            initializeTestMap();
+          }
+        }, 300);
+      };
+
+      var script = document.createElement("script");
+      script.id = "googleMapsTestScript";
+      var fullUrl = scriptUrl.startsWith("http") ? scriptUrl : ("http://127.0.0.1:5000" + scriptUrl);
+      script.src = fullUrl + (fullUrl.includes("?") ? "&" : "?") + "callback=onGoogleMapsTestLoaded";
+      script.async = true;
+      script.defer = true;
+      script.onerror = function() {
+        setPill(pillScriptLoad, "danger", "NETWORK BLOCKED");
+        logToView("error", "Failed to load Google Maps JS from " + script.src);
+      };
+      document.head.appendChild(script);
+    }
+
+    function loadGoogleMapsApi(apiKey) {
+      if (!apiKey) {
+        setPill(pillKeyConfig, "warning", "KEY NOT FOUND");
+        setBanner("warning", 
+          "<strong>No Google Maps API Key found in backend/.env</strong><br>" +
+          "Add <span class='code-tag'>GOOGLE_MAPS_API_KEY=YOUR_KEY</span> to <span class='code-tag'>backend/.env</span> or paste it below to run this isolated test."
+        );
+        logToView("warn", "No API key provided. Awaiting key entry.");
+        return;
+      }
+
+      currentLoadedKey = apiKey;
+      var masked = apiKey.substring(0, 8) + "..." + (apiKey.length > 12 ? apiKey.substring(apiKey.length - 4) : "");
+      setPill(pillKeyConfig, "success", "LOADED (" + masked + ")");
+      setPill(pillScriptLoad, "pending", "Injecting Script...");
+      logToView("info", "Injecting Google Maps JavaScript API with key: " + masked);
+
+      // Check if existing script exists
+      var oldScript = document.getElementById("googleMapsTestScript");
+      if (oldScript) {
+        oldScript.remove();
+      }
+
+      window.onGoogleMapsTestLoaded = function() {
+        logToView("success", "Google Maps JavaScript API script loaded successfully.");
+        setPill(pillScriptLoad, "success", "LOADED (v" + (google.maps.version || "latest") + ")");
+        
+        // Wait small tick to ensure gm_authFailure doesn't fire immediately
+        setTimeout(function() {
+          if (!authFailureTriggered) {
+            setPill(pillAuthStatus, "success", "AUTHORIZED");
+            initializeTestMap();
+          }
+        }, 300);
+      };
+
+      var script = document.createElement("script");
+      script.id = "googleMapsTestScript";
+      script.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(apiKey) + "&libraries=places,geometry&callback=onGoogleMapsTestLoaded";
+      script.async = true;
+      script.defer = true;
+      script.onerror = function() {
+        setPill(pillScriptLoad, "danger", "NETWORK BLOCKED");
+        logToView("error", "Failed to load Google Maps JS from maps.googleapis.com. Check internet or adblocker.");
+        setBanner("danger", "Failed to reach Google Maps servers. Check network connection or firewall.");
+      };
+
+      document.head.appendChild(script);
+    }
+
+    // =========================================================================
+    // INITIALIZE MAP & ADD BENGALURU MARKER
+    // =========================================================================
+    function initializeTestMap() {
+      try {
+        logToView("info", "Rendering Google Map centered on Bengaluru (" + BENGALURU_COORDS.lat + ", " + BENGALURU_COORDS.lng + ")...");
+        var canvas = document.getElementById("testMapCanvas");
+
+        // Remove placeholder
+        if (mapPlaceholder) {
+          mapPlaceholder.style.display = "none";
+        }
+
+        activeGoogleMap = new google.maps.Map(canvas, {
+          center: BENGALURU_COORDS,
+          zoom: 12,
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+          streetViewControl: true,
+          mapTypeControl: true,
+          zoomControl: true,
+          fullscreenControl: true
+        });
+
+        setPill(pillMapRender, "success", "RENDERED");
+        logToView("success", "Bengaluru map successfully rendered on canvas.");
+
+        // Add Bengaluru Marker (Step 5)
+        activeMarker = new google.maps.Marker({
+          position: BENGALURU_COORDS,
+          map: activeGoogleMap,
+          title: "Bengaluru, Karnataka, India - Smart Traffic Center",
+          animation: google.maps.Animation.DROP
+        });
+
+        activeInfoWindow = new google.maps.InfoWindow({
+          content: 
+            '<div style="color:#0f172a; padding:6px 8px; font-family:sans-serif; max-width:240px;">' +
+            '<h4 style="margin:0 0 4px 0; font-size:14px; font-weight:700; color:#1e293b;">📍 Bengaluru, Karnataka</h4>' +
+            '<p style="margin:0; font-size:12px; color:#475569; line-height:1.4;">' +
+            'Google Maps Platform Demo Key verified.<br>' +
+            'Center Coordinates: 12.9716° N, 77.5946° E' +
+            '</p>' +
+            '</div>'
+        });
+
+        activeMarker.addListener("click", function() {
+          activeInfoWindow.open(activeGoogleMap, activeMarker);
+        });
+
+        // Open InfoWindow once automatically after drop
+        setTimeout(function() {
+          activeInfoWindow.open(activeGoogleMap, activeMarker);
+        }, 600);
+
+        setPill(pillMarker, "success", "MARKER ACTIVE");
+        logToView("success", "Marker added at Bengaluru center coordinates with InfoWindow.");
+
+        setBanner("success", 
+          "<strong>🎉 Google Maps Platform Demo Key is WORKING!</strong><br>" +
+          "The Maps JavaScript API loaded successfully and displayed the Bengaluru map with an interactive marker.<br>" +
+          "Now evaluating Directions API and key permissions..."
+        );
+
+        // Test Directions API capability (Step 6)
+        testDirectionsCapability();
+
+      } catch (err) {
+        setPill(pillMapRender, "danger", "EXCEPTION");
+        logToView("error", "Exception initializing Google Map: " + err.message);
+      }
+    }
+
+    // =========================================================================
+    // TEST DIRECTIONS API CAPABILITY
+    // =========================================================================
+    function testDirectionsCapability() {
+      setPill(pillDirectionsApi, "pending", "Testing Route...");
+      logToView("info", "Checking DirectionsService capability for Demo Key...");
+
+      if (typeof google === "undefined" || !google.maps || !google.maps.DirectionsService) {
+        setPill(pillDirectionsApi, "danger", "UNAVAILABLE");
+        logToView("warn", "DirectionsService not available on loaded library.");
+        return;
+      }
+
+      var directionsService = new google.maps.DirectionsService();
+      
+      // Test short Bengaluru corridor: Majestic to MG Road
+      var request = {
+        origin: { lat: 12.9767, lng: 77.5713 },       // Majestic Bus Station
+        destination: { lat: 12.9756, lng: 77.6066 },  // MG Road
+        travelMode: google.maps.TravelMode.DRIVING
+      };
+
+      directionsService.route(request, function(result, status) {
+        if (status === google.maps.DirectionsStatus.OK) {
+          setPill(pillDirectionsApi, "success", "SUPPORTED (OK)");
+          logToView("success", "Directions API test succeeded! Your Demo Key supports driving routes.");
+          capabilityAssessmentText.innerHTML = 
+            "<span style='color:#34d399; font-weight:700;'>Full Route Support Confirmed:</span><br>" +
+            "Your Google Maps Demo Key supports both <strong>Maps JavaScript API</strong> and <strong>Directions API</strong>.<br>" +
+            "You can safely enable Google Maps driving directions in the Smart Traffic System.";
+        } else {
+          setPill(pillDirectionsApi, "warning", status);
+          logToView("warn", "Directions API returned status: " + status);
+          
+          if (status === "REQUEST_DENIED") {
+            capabilityAssessmentText.innerHTML = 
+              "<span style='color:#fbbf24; font-weight:700;'>Maps Display Works, but Directions API is Restricted:</span><br>" +
+              "Google returned <code>REQUEST_DENIED</code> for driving directions. This is normal for Demo keys where only 'Maps JavaScript API' is enabled and 'Directions API' has not been enabled in Google Cloud Console.<br>" +
+              "<strong>Solution:</strong> The system automatically uses the <strong>Leaflet + OSRM free routing engine</strong> for driving routes while displaying Leaflet maps.";
+          } else {
+            capabilityAssessmentText.innerHTML = 
+              "<span style='color:#fbbf24;'>Directions API status: " + status + "</span>.<br>" +
+              "Automatic fallback: Leaflet + OSRM free routing remains active.";
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // FETCH CONFIGURATION FROM BACKEND /api/config/maps
+    // =========================================================================
+    async function fetchBackendConfig() {
+      logToView("info", "Checking backend configuration via http://127.0.0.1:5000/api/config/maps...");
+      try {
+        var resp = await fetch("http://127.0.0.1:5000/api/config/maps");
+        if (!resp.ok) {
+          throw new Error("HTTP " + resp.status);
+        }
+        var data = await resp.json();
+        if (data.google_maps_configured && data.script_url) {
+          logToView("success", "Found GOOGLE_MAPS_API_KEY configured in backend/.env!");
+          loadGoogleMapsFromUrl(data.script_url);
+        } else if (data.google_maps_configured && data.api_key) {
+          logToView("success", "Found GOOGLE_MAPS_API_KEY in backend/.env!");
+          loadGoogleMapsApi(data.api_key);
+        } else {
+          logToView("warn", "backend/.env does not contain an active GOOGLE_MAPS_API_KEY yet.");
+          setPill(pillKeyConfig, "warning", "EMPTY IN .ENV");
+          setBanner("warning", 
+            "<strong>GOOGLE_MAPS_API_KEY is not set in backend/.env</strong><br>" +
+            "To test, either paste your key in the box on the right, or add <span class='code-tag'>GOOGLE_MAPS_API_KEY=YOUR_KEY</span> to <span class='code-tag'>backend/.env</span>."
+          );
+        }
+      } catch (err) {
+        logToView("warn", "Backend server is not running on port 5000 (fetch error: " + err.message + ").");
+        setPill(pillKeyConfig, "pending", "MANUAL INPUT");
+        setBanner("info", 
+          "<strong>Backend server is offline or not yet started on port 5000.</strong><br>" +
+          "You can paste your Google Maps Demo Key in the input field on the right to test it immediately, or start the backend using <span class='code-tag'>python backend/app.py</span>."
+        );
+      }
+    }
+
+    // =========================================================================
+    // EVENT LISTENERS
+    // =========================================================================
+    if (btnApplyKey) {
+      btnApplyKey.addEventListener("click", function() {
+        var key = (inputLocalKey.value || "").trim();
+        if (!key) {
+          alert("Please enter a Google Maps API Key.");
+          return;
+        }
+        authFailureTriggered = false;
+        loadGoogleMapsApi(key);
+      });
+    }
+
+    if (btnRecenter) {
+      btnRecenter.addEventListener("click", function() {
+        if (activeGoogleMap) {
+          activeGoogleMap.setCenter(BENGALURU_COORDS);
+          activeGoogleMap.setZoom(12);
+          if (activeInfoWindow && activeMarker) {
+            activeInfoWindow.open(activeGoogleMap, activeMarker);
+          }
+        }
+      });
+    }
+
+    var btnClearLog = document.getElementById("btnClearLog");
+    if (btnClearLog) {
+      btnClearLog.addEventListener("click", function() {
+        if (consoleLogView) consoleLogView.innerHTML = "";
+      });
+    }
+
+    // Run on startup
+    window.addEventListener("DOMContentLoaded", function() {
+      logToView("info", "Starting isolated Google Maps integration test...");
+      fetchBackendConfig();
+    });
+  </script>
+</body>
+</html>

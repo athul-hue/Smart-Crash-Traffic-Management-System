@@ -1,0 +1,39 @@
+# Environment — NEVER commit credentials
+.env
+backend/.env
+*.env
+local_maps_config.js
+
+# Uploaded incident media
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Node & Frontend Build
+node_modules/
+.vite/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
